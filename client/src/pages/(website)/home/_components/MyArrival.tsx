@@ -15,7 +15,7 @@ const MyArrival = () => {
     const [gender,setGender] = useState<'male'|'female'>('female')
     const productQuery = useProductSlider({_gender:gender,_isFeatured:true})
     useEffect(()=>{
-        if(productQuery?.data){
+        if(productQuery?.data ){
             setProducts(productQuery.data)
         }
     },[productQuery?.data])

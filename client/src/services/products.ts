@@ -23,7 +23,7 @@ export const getProductSlider = async(options:any)=> {
         return res.data
     } catch (error) {
         console.log(error)
-        return error
+        // return error
     }
 }
 export const getProductById = async(id:string|number)=> {

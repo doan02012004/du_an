@@ -1,12 +1,12 @@
 
 import express from 'express'
 import { addColors, addSizes, createProduct, deleteColor, deleteProduct, deleteSize, getAllProduct, getByIdProduct, getProductSlider, updateAttributeProduct, updateGallery, updateInforProduct } from '../controllers/productController.js'
-
+import {checkAuth} from '../middleware/checkAuth.js'
 const router = express.Router()
 
 router.post('/', createProduct)
 router.get('/',getAllProduct)
-router.get('/slider',getProductSlider)
+router.get('/slider',checkAuth ,getProductSlider)
 router.put('/updateAtb/:productId', updateAttributeProduct)
 router.put('/updateInfor/:productId', updateInforProduct)
 router.put('/updateGallery/:productId', updateGallery)

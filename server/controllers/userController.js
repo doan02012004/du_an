@@ -20,6 +20,7 @@ export const getAllUser = async (req, res) => {
 
 // lấy user theo id
 export const getByIdUser = async (req, res) => {
+   
     const id = req.params.id
     try {
         const users = await UserModel.findById(id)
@@ -60,7 +61,7 @@ export const deleteUser = async (req, res) => {
 //update usser theo id
 export const updateUser = async (req, res) => {
     try {
-        const users = await UserModel.findByIdAndUpdate(req.params.id,req.body)
+        const users = await UserModel.findByIdAndUpdate(req.params.id, req.body)
         //kiem tra user xem đã tồn tại theo id trên đường dẫn
         if (!users) {
             return res.status(StatusCodes.NOT_FOUND).json({
@@ -77,7 +78,7 @@ export const updateUser = async (req, res) => {
 
 export const updateUserStatus = async (req, res) => {
     try {
-        const users = await UserModel.findByIdAndUpdate(req.params.id,{status:req.body.status},{new:true})
+        const users = await UserModel.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true })
         //kiem tra user xem đã tồn tại theo id trên đường dẫn
         return res.status(StatusCodes.OK).json(users)
     } catch (error) {
@@ -100,7 +101,7 @@ export const add = async (req, res) => {
         district: req.body.district,
         ward: req.body.ward,
         address: req.body.address,
-        role:req.body.role
+        role: req.body.role
     }
     try {
         //lấy schemma để validate
@@ -119,14 +120,14 @@ export const add = async (req, res) => {
         }
         //mã hóa mật khẩu khẩu bằng jwt
         const hashPassword = await bcrypt.hash(User.password, 10)
-        
-     
+
+
 
         //sau khi pass qua các bước trên thì ta sẽ tạo đc 1 tài khoản mới
         const userData = await UserModel.create({
             ...req.body,
             password: hashPassword,
-            
+
         })
         return res.status(StatusCodes.CREATED).json({
             message: "Đăng ký thành công",
@@ -201,7 +202,7 @@ const generateAccessToken = (user) => {
             admin: user.admin
         },
         process.env.JWT_TOKEN_ACC,
-        { expiresIn: "30s" }
+        { expiresIn: "1m" }
     )
 }
 
@@ -212,13 +213,14 @@ const generateRefreshToken = (user) => {
             admin: user.admin
         },
         process.env.JWT_TOKEN_REF,
-        { expiresIn: "30d" }
+        { expiresIn: "5m" }
     )
 }
 // đăng nhập tài khoản
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body
+        console.log("Ok")
         //lấy schemma để validate
         const { error } = loginSchema.validate(req.body, { abortEarly: false });
         if (error) {
@@ -246,11 +248,11 @@ export const login = async (req, res) => {
             //refreshToken  
             const refreshToken = generateRefreshToken(user)
             refreshTokens.push(refreshToken)
-            res.cookie('cookie', refreshToken, {
+            res.cookie('refeshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
-                path: "/",
                 sameSite: "strict",
+                maxAge: 24 * 60 * 60 * 1000,// Thời gian sống của cookie, ví dụ: 1 ngày
             })
             //trả về ko có mk
             const { password, ...orthers } = user._doc
@@ -270,31 +272,34 @@ export const login = async (req, res) => {
 
 export const requestRefreshToken = async (req, res) => {
     try {
-        const refreshToken = req.cookies.cookie;
-        res.status(StatusCodes.OK).json({ message: "new token: ", refreshToken })
+        const refreshToken = req.cookies.refeshToken;
         if (!refreshToken) return res.status(StatusCodes.UNAUTHORIZED).json('bạn chưa đăng nhập')
-        if (!refreshTokens.includes(refreshToken)) {
-            return res.status(StatusCodes.FORBIDDEN).json('refresh token it not valid')
-        }
+        // if (!refreshTokens.includes(refreshToken)) {
+        //     return res.status(StatusCodes.FORBIDDEN).json('refresh token it not valid')
+        // }
         jwt.verify(refreshToken, process.env.JWT_TOKEN_REF, (err, user) => {
             if (err) {
                 console.log(err)
+                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "refeshToken hết hạn" })
             }
             //lọc token cũ ra 
-            refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+            // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
             const newAccessToken = generateAccessToken(user)
-            const newRefreshToken = generateRefreshToken(user)
-            refreshTokens.push(newRefreshToken);
-            res.cookie('cookie', newRefreshToken, {
-                httpOnly: true,
-                secure: true,
-                path: "/",
-                sameSite: "strict",
-            })
-            res.status(StatusCodes.OK).json({ accessToken: newAccessToken })
+
+            // refreshTokens.push(newRefreshToken);
+            return res.status(StatusCodes.OK).json({ accessToken: newAccessToken })
         })
     } catch (error) {
         console.log("lỗi xuất lại token:", error.message)
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "lỗi máy chủ" })
+    }
+}
+
+export const getAccount = async (req, res) => {
+    try {
+        const user = await UserModel.findOne({_id:req.user._id}).select('-password')
+        return res.status(200).json(user)
+    } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "lỗi máy chủ" })
     }
 }

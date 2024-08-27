@@ -4,8 +4,9 @@ import { createSlice } from "@reduxjs/toolkit"
 const authSlice = createSlice({
     name: "auth",
     initialState: {
+        // accessToken:'',
         login: {
-            currentUser: null,
+            currentUser: null ,
             isFetching: false,
             error: false
         },
@@ -16,6 +17,9 @@ const authSlice = createSlice({
         }
     },
     reducers: {
+        // setAccessToken: (state, action) => {
+        //     state.accessToken = action.payload;
+        // },
         loginStart: (state) => {
             state.login.isFetching = true
         },
@@ -51,7 +55,8 @@ export const {
     loginSuccess,
     registerStart,
     registerFailed,
-    registerSuccess
+    registerSuccess,
+    // setAccessToken
 } = authSlice.actions
 
 export default authSlice.reducer

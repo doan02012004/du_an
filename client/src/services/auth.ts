@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { loginFailed, loginStart, loginSuccess, registerFailed, registerStart, registerSuccess } from "../common/redux/features/authSlice";
+import { loginFailed, loginStart, loginSuccess, registerFailed, registerStart, registerSuccess,  } from "../common/redux/features/authSlice";
 import { Isignin, Isignup, Iuser } from "../common/interfaces/auth";
 import instance from "../common/config/axios";
 import { message } from "antd";
 
 
-export const loginUser = async (user: Isignin, dispatch: any, navigate: any) => {
+
+export const loginUser = async (user: Isignin, dispatch: any, navigate: any,setAccesToken:any) => {
     dispatch(loginStart())
     try {
         const res = await instance.post("/users/login", user)
         dispatch(loginSuccess(res.data))
+        setAccesToken(res.data.accessToken)
         navigate("/")
     } catch (error) {
         dispatch(loginFailed())
@@ -86,5 +88,21 @@ export const deleteUser = async (user:Iuser)=>{
     } catch (error) {
         message.error('Xoá lỗi!')
         return error
+    }
+}
+export const getNewToken = async ()=>{
+    try {
+        const {data} = await instance.post(`/users/refresh`)
+        return data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getAccountUser = async ()=>{
+    try {
+        const {data} = await instance.get(`/users/getaccount/user`)
+        return data
+    } catch (error) {
+        console.log(error)
     }
 }

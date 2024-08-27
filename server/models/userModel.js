@@ -57,10 +57,10 @@ const userSchema = new mongoose.Schema({
         default: "user",
     },
 
-    admin: {
-        type: Boolean,
-        default: false
-    }
+    // admin: {
+    //     type: Boolean,
+    //     default: false
+    // }
 
 }, {
     timestamps: true, versionKey: false

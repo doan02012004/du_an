@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { loginUser } from '../../../../../services/auth'
+import { AppContext } from '../../../../../common/contexts/AppContextProvider'
 
 type FormLoginProps = { state: number | null, onChangeForm: (number: number) => void }
 
@@ -10,6 +11,7 @@ type FormLoginProps = { state: number | null, onChangeForm: (number: number) => 
 const FormLogin = ({ state, onChangeForm }: FormLoginProps) => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 576)
     const formRef = useRef<any>()
+    const {setAccesToken} = useContext(AppContext)
     useEffect(() => {
         window.addEventListener('resize', () => {
             if (window.innerWidth < 576) {
@@ -43,7 +45,7 @@ const FormLogin = ({ state, onChangeForm }: FormLoginProps) => {
             email: email,
             password: password
         }
-        loginUser(newUser, dispatch, navigate)
+        loginUser(newUser, dispatch, navigate,setAccesToken)
     }
     return (
         <div className="w-full  lg:w-[480px] ">
