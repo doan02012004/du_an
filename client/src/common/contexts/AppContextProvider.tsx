@@ -43,9 +43,6 @@ const AppContextProvider = ({ children }: AppContextProviderProps) => {
       const originalRequest = error.config;
       if (error.response?.data?.EC === 1) {
         setAccesToken(null)
-        if(window.location.href !== '/signin'){
-          window.location.href = '/signin';
-        }
       }
       else if (error.response && error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;

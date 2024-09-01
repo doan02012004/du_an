@@ -253,7 +253,13 @@ export const login = async (req, res) => {
                 httpOnly: true,
                 secure: true,
                 sameSite: "strict",
-                maxAge: 24 * 60 * 60 * 1000,// Thời gian sống của cookie, ví dụ: 1 ngày
+                maxAge: 30 * 24 * 60 * 60 * 1000,// Thời gian sống của cookie, ví dụ: 1 ngày
+            })
+            res.cookie('accessToken', accessToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "strict",
+                maxAge: 30 * 24 * 60 * 60 * 1000,// Thời gian sống của cookie, ví dụ: 1 ngày
             })
             //trả về ko có mk
             const { password, ...orthers } = user._doc
@@ -274,6 +280,7 @@ export const login = async (req, res) => {
 export const requestRefreshToken = async (req, res) => {
     try {
         const refreshToken = req.cookies.refeshToken;
+        const acToken = req.cookies.accessToken;
         if (!refreshToken) return res.status(403).json({
             EC: 1,
             message:"Bạn chưa đăng nhập"
@@ -281,17 +288,25 @@ export const requestRefreshToken = async (req, res) => {
         // if (!refreshTokens.includes(refreshToken)) {
         //     return res.status(StatusCodes.FORBIDDEN).json('refresh token it not valid')
         // }
-        jwt.verify(refreshToken, process.env.JWT_TOKEN_REF, (err, user) => {
-            if (err) {
-                console.log(err)
-                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ EC:1,error: "refeshToken hết hạn" })
+        jwt.verify(acToken,process.env.JWT_TOKEN_ACC,(err,user)=>{
+            if(err){
+                jwt.verify(refreshToken, process.env.JWT_TOKEN_REF, (err, user) => {
+                    if (err) {
+                        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ EC:1,error: "refeshToken hết hạn" })
+                    }
+                    //lọc token cũ ra 
+                    // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+                    const newAccessToken = generateAccessToken(user)
+                    res.cookie('accessToken', newAccessToken, {
+                        httpOnly: true,
+                        secure: true,
+                        sameSite: "strict",
+                        maxAge: 30 * 24 * 60 * 60 * 1000,// Thời gian sống của cookie, ví dụ: 1 ngày
+                    })
+                    return res.status(StatusCodes.OK).json({ accessToken: newAccessToken })
+                })
             }
-            //lọc token cũ ra 
-            // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
-            const newAccessToken = generateAccessToken(user)
-
-            // refreshTokens.push(newRefreshToken);
-            return res.status(StatusCodes.OK).json({ accessToken: newAccessToken })
+            return res.status(StatusCodes.OK).json({ accessToken: acToken })
         })
     } catch (error) {
         console.log("lỗi xuất lại token:", error.message)
