@@ -1,9 +1,11 @@
+import dotenv from 'dotenv'
 import UserModel from "../models/userModel.js"
 import bcrypt from "bcryptjs"
 import { registerSchema, loginSchema, addSchema } from "../validations/userValidations.js"
 // import generateRefreshToken from "../ultils/tokenAuth.js"
 import jwt from 'jsonwebtoken'
 import { StatusCodes } from "http-status-codes";
+dotenv.config()
 let refreshTokens = [];
 // lấy toàn bộ user
 // lấy toàn bộ user
@@ -202,7 +204,7 @@ const generateAccessToken = (user) => {
             admin: user.admin
         },
         process.env.JWT_TOKEN_ACC,
-        { expiresIn: "1m" }
+        { expiresIn: process.env.TIME_TOKEN_ACC }
     )
 }
 
@@ -213,14 +215,13 @@ const generateRefreshToken = (user) => {
             admin: user.admin
         },
         process.env.JWT_TOKEN_REF,
-        { expiresIn: "5m" }
+        { expiresIn: process.env.TIME_TOKEN_REF }
     )
 }
 // đăng nhập tài khoản
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body
-        console.log("Ok")
         //lấy schemma để validate
         const { error } = loginSchema.validate(req.body, { abortEarly: false });
         if (error) {
@@ -273,14 +274,17 @@ export const login = async (req, res) => {
 export const requestRefreshToken = async (req, res) => {
     try {
         const refreshToken = req.cookies.refeshToken;
-        if (!refreshToken) return res.status(StatusCodes.UNAUTHORIZED).json('bạn chưa đăng nhập')
+        if (!refreshToken) return res.status(403).json({
+            EC: 1,
+            message:"Bạn chưa đăng nhập"
+        })
         // if (!refreshTokens.includes(refreshToken)) {
         //     return res.status(StatusCodes.FORBIDDEN).json('refresh token it not valid')
         // }
         jwt.verify(refreshToken, process.env.JWT_TOKEN_REF, (err, user) => {
             if (err) {
                 console.log(err)
-                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "refeshToken hết hạn" })
+                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ EC:1,error: "refeshToken hết hạn" })
             }
             //lọc token cũ ra 
             // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
@@ -300,7 +304,7 @@ export const getAccount = async (req, res) => {
         const user = await UserModel.findOne({_id:req.user._id}).select('-password')
         return res.status(200).json(user)
     } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "lỗi máy chủ" })
+        res.status(500).json({ error: "lỗi máy chủ" })
     }
 }
 

@@ -92,7 +92,7 @@ export const deleteUser = async (user:Iuser)=>{
 }
 export const getNewToken = async ()=>{
     try {
-        const {data} = await instance.post(`/users/refresh`)
+        const {data} = await instance.post(`/users/token/refresh`)
         return data
     } catch (error) {
         console.log(error)

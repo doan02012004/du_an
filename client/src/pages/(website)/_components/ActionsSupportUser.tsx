@@ -61,6 +61,7 @@ const ActionsSupportUser = () => {
                 <span onClick={onHandeActionUser} className="sub-top block cursor-pointer text-base hover:text-gray-800 ">
                     <i className="fa-regular fa-user" />
                 </span>
+                
                 {actionUser && (
                     <div className="sub-menu transition-all duration-500 ease-in-out  absolute min-w-[255px] top-10 right-0 bg-white border border-gray rounded-md z-[3]">
                         <div className="border-b border-gray">

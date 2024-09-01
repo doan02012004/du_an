@@ -14,6 +14,6 @@ router.put('/update/:id', updateUser)
 router.post('/register', register)
 router.post('/login', login)
 router.post('/logout',  logout)
-router.post('/refresh', requestRefreshToken)
+router.post('/token/refresh', requestRefreshToken)
 
 export default router

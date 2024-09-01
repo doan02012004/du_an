@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 const ProductPage = () => {
-    const [limit,] = useState(2)
+    const [limit,] = useState(6)
     const [searchParams,] = useSearchParams()
     const page:string|number|null = searchParams.get('page')
     const sizes = searchParams.get('sizes')

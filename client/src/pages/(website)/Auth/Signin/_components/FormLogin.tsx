@@ -42,8 +42,8 @@ const FormLogin = ({ state, onChangeForm }: FormLoginProps) => {
         e.preventDefault();
 
         const newUser = {
-            email: email,
-            password: password
+            email: "doana1k24@gmail.com",
+            password: "123456"
         }
         loginUser(newUser, dispatch, navigate,setAccesToken)
     }

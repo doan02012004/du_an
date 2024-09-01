@@ -49,7 +49,7 @@ export const checkAuth = async(req,res,next) =>{
         if(req?.headers?.authorization?.split(" ")?.[1]){
             const token = req?.headers?.authorization?.split(" ")?.[1]
             if(!token){
-                return res.status(403).json(
+                return res.status(401).json(
                    {
                      message:"Token không tồn tại "
                    }
@@ -65,7 +65,7 @@ export const checkAuth = async(req,res,next) =>{
                     return res.status(403).json({message:"Bạn không có quyền"})
                 }
             } catch (error) {
-                return res.status(403).json({message:"Token hết hạn / không hợp lệ "})
+                return res.status(401).json({message:"Token hết hạn / không hợp lệ "})
             }
         }else{
             return res.status(401).json({
@@ -73,6 +73,6 @@ export const checkAuth = async(req,res,next) =>{
             })
         }
     } catch (error) {
-        return res.status(403).json({message:"Token hết hạn / không hợp lệ "})
+        return res.status(401).json({message:"Token hết hạn / không hợp lệ "})
     }
 }

@@ -13,18 +13,35 @@ export const createProduct = async (req, res) => {
 }
 export const getAllProduct = async (req, res) => {
     try {
-        const { _slug, _minPrice, _maxPrice,_limit, _page,_sizes,_colors,_search } = req.query;
+        const { _slug, _minPrice, _maxPrice,_limit, _page,_sizes,_colors,_search,sell_order } = req.query;
         const limit = _limit|| 2 ;
         const page = parseInt(_page)|| 1;
         const skip = limit * (page-1)
+        let sort = {}
         let query = {
             $and:[{price_new:{$gte:_minPrice || 0}},{price_new:{$lte:_maxPrice || 10000000}}]
         };
+        if(sell_order){
+            if(sell_order == 'productnew'){
+                sort["createdAt"] = -1
+            }
+            if(sell_order == 'asc'){
+                sort["price_new"] = 1
+            }
+            if(sell_order == 'desc'){
+                sort["price_new"] = -1
+            }
+
+        }
         if (_slug) {
             // Tìm categoryId dựa trên slug
-            const category = await Category.findOne({ slug: _slug });
+            const arraySlug = _slug.split(',')
+            const category = await Category.find({
+                slug: {$in: arraySlug}
+            });
             if (category) {
-              query.categoryId = category._id;
+                const newCategoryId = category.map((item) => item._id)
+              query['categoryId'] = {$in:newCategoryId}
             } else {
               return res.status(404).json({ message: 'Category not found' });
             }
@@ -47,6 +64,7 @@ export const getAllProduct = async (req, res) => {
         .find(query)
         .limit(limit)
         .skip(skip)
+        .sort(sort)
         .populate('categoryId')
         const total = await ProductModel.countDocuments(query)
         const totalPage = Math.ceil(total/limit)

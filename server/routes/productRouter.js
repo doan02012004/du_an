@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.post('/', createProduct)
 router.get('/',getAllProduct)
-router.get('/slider',checkAuth ,getProductSlider)
+router.get('/slider' ,getProductSlider)
 router.put('/updateAtb/:productId', updateAttributeProduct)
 router.put('/updateInfor/:productId', updateInforProduct)
 router.put('/updateGallery/:productId', updateGallery)
