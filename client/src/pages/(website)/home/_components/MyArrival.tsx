@@ -55,6 +55,7 @@ const MyArrival = () => {
                               {products?.map((product:Iproduct,i:number)=>(
                                   <SwiperSlide key={i} className="swiper-slide">
                                     <Product product={product}/>
+                                    {/* <CartItem cart={cart} /> */}
                                   </SwiperSlide>
                               ))}
                                 {/* <SwiperSlide className="swiper-slide">

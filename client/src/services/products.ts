@@ -32,7 +32,7 @@ export const getProductById = async(id:string|number)=> {
         return res.data
     } catch (error) {
         console.log(error)
-        return error
+        
     }
 }
 export const addProduct = async(product?:Iproduct)=>{

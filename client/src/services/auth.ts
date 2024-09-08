@@ -6,25 +6,27 @@ import { message } from "antd";
 
 
 
-export const loginUser = async (user: Isignin, dispatch: any, navigate: any,setAccesToken:any) => {
+export const loginUser = async (user: Isignin, dispatch: any, navigate: any,setAccesToken:any,setIsLogin:any) => {
     dispatch(loginStart())
     try {
         const res = await instance.post("/users/login", user)
         dispatch(loginSuccess(res.data))
         setAccesToken(res.data.accessToken)
+        setIsLogin(true)
         navigate("/")
     } catch (error) {
         dispatch(loginFailed())
     }
 }
 
-export const registerUser = async (user: Isignup, dispatch: any, navigate: any) => {
+export const registerUser = async (user: Isignup, dispatch: any) => {
     dispatch(registerStart());
     try {
         console.log("User data being sent:", user);
-        await instance.post("/users/register", user)
+        const res = await instance.post("/users/register", user)
         dispatch(registerSuccess())
-        navigate('/signin')
+        // navigate('/signin')
+        return res.data
     } catch (error) {
         dispatch(registerFailed())
     }

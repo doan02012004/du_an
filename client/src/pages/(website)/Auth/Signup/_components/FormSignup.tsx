@@ -13,6 +13,7 @@ const FormSignup = () => {
     const [huyen, setHuyen] = useState([])
     const [xa, setXa] = useState<any>([])
     const { register, handleSubmit } = useForm<Isignup>()
+    const [user,setUser] = useState(null)
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
@@ -21,7 +22,23 @@ const FormSignup = () => {
             queryDataLocation.data
         }
     }, [queryDataLocation.data])
-
+    useEffect(()=>{
+        if(user){
+            (async()=>{
+                try {
+                    // đăng ký  adress
+                    // const dataAddress = {
+                    //     fullName:`${user.lastname} ${user.fisname} `
+                    // }
+                    // post api
+                    // nhận về 1 dữ liệu
+                    // nếu thành công thì navigate signin
+                } catch (error) {
+                    console.log(error)
+                }
+            })()
+        }
+    },[user])
     const onChangeTinh = (tinh: string) => {
         if (tinh !== '') {
             const newDataTinh = queryDataLocation?.data?.find((item: any) => item.name == tinh)
@@ -69,8 +86,11 @@ const FormSignup = () => {
         // console.log('Dữ liệu form:', data);
 
         try {
-            await registerUser(data, dispatch, navigate);
+          const user =  await registerUser(data, dispatch, navigate);
             message.success("đăng kí thành công")
+            if(user){
+                setUser(user)
+            }
         } catch (error) {
             console.error('Lỗi đăng ký:', error);
         }

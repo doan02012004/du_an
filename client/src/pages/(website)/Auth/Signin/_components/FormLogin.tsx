@@ -11,7 +11,7 @@ type FormLoginProps = { state: number | null, onChangeForm: (number: number) => 
 const FormLogin = ({ state, onChangeForm }: FormLoginProps) => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 576)
     const formRef = useRef<any>()
-    const {setAccesToken} = useContext(AppContext)
+    const {setAccesToken,setIsLogin} = useContext(AppContext)
     useEffect(() => {
         window.addEventListener('resize', () => {
             if (window.innerWidth < 576) {
@@ -45,7 +45,7 @@ const FormLogin = ({ state, onChangeForm }: FormLoginProps) => {
             email: "doana1k24@gmail.com",
             password: "123456"
         }
-        loginUser(newUser, dispatch, navigate,setAccesToken)
+        loginUser(newUser, dispatch, navigate,setAccesToken,setIsLogin)
     }
     return (
         <div className="w-full  lg:w-[480px] ">

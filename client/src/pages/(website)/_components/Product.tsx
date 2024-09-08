@@ -6,6 +6,8 @@ import { IColor } from '../../../common/interfaces/Color'
 import { useDispatch, useSelector } from 'react-redux'
 import { setProductId } from '../../../common/redux/features/productSlice'
 import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import useCartMutation from '../../../common/hooks/carts/useCartMutation'
 
 type Props = {
   product: Iproduct
@@ -17,6 +19,7 @@ const Product = ({ product }: Props) => {
   const [color, setColor] = useState('' as string)
   const [checkSizes, setCheckSizes] = useState([] as string[])
   const productId = useSelector((state: any) => state.product.productId)
+  const cartMutation = useCartMutation()
   const dispath = useDispatch()
   useEffect(()=>{
     if(productId == null){
@@ -30,6 +33,7 @@ const Product = ({ product }: Props) => {
   useEffect(() => {
     const newAttributes = product?.attributes?.filter((item: Iattribute) => (item.color == color && item.instock > 0))
     const newCheckSizes = newAttributes?.map((item:Iattribute) => item.size)
+    // console.log(newCheckSizes)
     setCheckSizes(newCheckSizes)
   }, [color])
   const onSetProductId = async(product:Iproduct) =>{
@@ -50,6 +54,14 @@ const Product = ({ product }: Props) => {
     setColor(item.name)
     const newGallery: Igallery | any = product?.gallerys.find((gallery: Igallery) => gallery.name == item.name)
     setGallery(newGallery)
+  }
+  const addToCart = async(size:string) =>{
+    // console.log(size)
+    const attribute = await product?.attributes?.find((item:Iattribute) => (item.color == color && item.size == size))
+    toast.success("Đã thêm vào giỏ hàng")
+    console.log("cartItem >>:", {productId, attributeId:attribute?._id ,quantity:1})
+    const newCart =  {productId, attributeId:attribute?._id ,quantity:1}
+    cartMutation.mutate({action:"addtocart",newCart:newCart})
   }
   return (
     <>
@@ -110,7 +122,7 @@ const Product = ({ product }: Props) => {
                 {
                   product?.sizes.map((item: string) => (
                     <li key={item}>
-                      <button disabled={checkSizes.includes(item)} className={`${checkSizes.includes(item)? 'text-gray-300' : 'text-dark hover:border-dark '} w-full text-sm py-2  font-semibold border border-white lg:text-base lg:py-3 `}>{item}</button>
+                      <button onClick={()=> addToCart(item)} disabled={!checkSizes.includes(item)} className={`${!checkSizes.includes(item)? 'text-gray-300' : 'text-dark hover:border-dark '} w-full text-sm py-2  font-semibold border border-white lg:text-base lg:py-3 `}>{item}</button>
                     </li>
                   ))
                 }

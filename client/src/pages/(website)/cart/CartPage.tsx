@@ -1,10 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Status from './_components/Status'
 import Table from './_components/Table'
 import Total from './_components/Total'
+import { useSelector } from 'react-redux'
 
 const CartPage = () => {
+    const navigate = useNavigate()
+    const carts = useSelector((state:any) => state.cart.carts)
+    const totalCart = useSelector((state:any) => state.cart.totalCart)
     return (
         <section>
             <div>
@@ -13,11 +18,11 @@ const CartPage = () => {
                         <Status/>
                         <div className="py-6 lg:py-11 flex gap-2 items-center">
                             <span className="text-sm lg:text-2xl text-[#000000] font-bold">Giỏ hàng của bạn</span>
-                            <span className="text-sm lg:text-2xl text-red font-bold">1 Sản Phẩm</span>
+                            <span className="text-sm lg:text-2xl text-red font-bold">{totalCart} Sản Phẩm</span>
                         </div>
-                        <Table/>
+                        <Table carts={carts}/>
                         <div className="py-6 lg:pt-7">
-                            <div className="w-[60%] flex items-center border border-black lg:w-[30%] py-3 justify-center gap-2 rounded-tl-[20px] rounded-br-[20px] hover:bg-black hover:text-white">
+                            <div onClick={() => navigate('/')} className="w-[60%] flex items-center border border-black lg:w-[30%] py-3 justify-center gap-2 rounded-tl-[20px] rounded-br-[20px] hover:bg-black hover:text-white">
                                 <span><i className="fa-solid fa-arrow-left-long" /></span>
                                 <button>Tiếp tục mua hàng</button>
                             </div>

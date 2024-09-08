@@ -6,9 +6,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import { A11y, Navigation, Pagination, Scrollbar } from "swiper/modules";
 
-type Props = {}
-
-const Similar_product = (props: Props) => {
+const Similar_product = () => {
   return (
     <>
         <section className="newArrival mb-[18px] lg:mb-10">

@@ -288,26 +288,48 @@ export const requestRefreshToken = async (req, res) => {
         // if (!refreshTokens.includes(refreshToken)) {
         //     return res.status(StatusCodes.FORBIDDEN).json('refresh token it not valid')
         // }
-        jwt.verify(acToken,process.env.JWT_TOKEN_ACC,(err,user)=>{
-            if(err){
-                jwt.verify(refreshToken, process.env.JWT_TOKEN_REF, (err, user) => {
-                    if (err) {
-                        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ EC:1,error: "refeshToken hết hạn" })
-                    }
-                    //lọc token cũ ra 
-                    // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
-                    const newAccessToken = generateAccessToken(user)
-                    res.cookie('accessToken', newAccessToken, {
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: "strict",
-                        maxAge: 30 * 24 * 60 * 60 * 1000,// Thời gian sống của cookie, ví dụ: 1 ngày
+        if(acToken){
+            jwt.verify(acToken,process.env.JWT_TOKEN_ACC,(err,user)=>{
+                if(err){
+                    jwt.verify(refreshToken, process.env.JWT_TOKEN_REF, (err, user) => {
+                        if (err) {
+                            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ EC:1,error: "refeshToken hết hạn" })
+                        }
+                       else{
+                         //lọc token cũ ra 
+                        // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+                        const newAccessToken = generateAccessToken(user)
+                        res.cookie('accessToken', newAccessToken, {
+                            httpOnly: true,
+                            secure: true,
+                            sameSite: "strict",
+                            maxAge: 30 * 24 * 60 * 60 * 1000,// Thời gian sống của cookie, ví dụ: 1 ngày
+                        })
+                        return res.status(StatusCodes.OK).json({ accessToken: newAccessToken })
+                       }
                     })
-                    return res.status(StatusCodes.OK).json({ accessToken: newAccessToken })
+                }
+                else{
+                    return res.status(StatusCodes.OK).json({ accessToken: acToken })
+                }
+            })
+        }else{
+            jwt.verify(refreshToken, process.env.JWT_TOKEN_REF, (err, user) => {
+                if (err) {
+                    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ EC:1,error: "refeshToken hết hạn" })
+                }
+                //lọc token cũ ra 
+                // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+                const newAccessToken = generateAccessToken(user)
+                res.cookie('accessToken', newAccessToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "strict",
+                    maxAge: 30 * 24 * 60 * 60 * 1000,// Thời gian sống của cookie, ví dụ: 1 ngày
                 })
-            }
-            return res.status(StatusCodes.OK).json({ accessToken: acToken })
-        })
+                return res.status(StatusCodes.OK).json({ accessToken: newAccessToken })
+            })
+        }
     } catch (error) {
         console.log("lỗi xuất lại token:", error.message)
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "lỗi máy chủ" })
