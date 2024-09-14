@@ -28,11 +28,12 @@ const CartItem = ({ cart }: Props) => {
       setIsError(false)
       if (inputRef.current) {
         inputRef.current.value = cart?.quantity
+        
       }
     } else {
       setIsError(true)
     }
-  }, [cart, inputRef])
+  }, [cart, inputRef,cart.quantity])
   useEffect(() => {
     if (product) {
       const attribute = product?.attributes?.find((item: Iattribute) => item._id == cart?.attributeId)

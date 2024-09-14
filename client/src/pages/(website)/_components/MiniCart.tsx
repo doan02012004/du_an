@@ -1,21 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import CartItem from './CartItem';
 import { formatPrice } from '../../../common/utils/product';
 import { IcartItem } from '../../../common/interfaces/cart';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCarts, setTotalCart, setTotalPrice } from '../../../common/redux/features/cartSlice';
-import useCartQuery from '../../../common/hooks/carts/useCartQuery';
+import {  setTotalCart } from '../../../common/redux/features/cartSlice';
+
+import { AppContext } from '../../../common/contexts/AppContextProvider';
 
 const MiniCart = () => {
     const [isOpenCart, setIsOpenCart] = useState(false)
-    const totalPrice = useSelector((state:any) => state.cart.totalPrice)
-    const carts = useSelector((state:any) => state.cart.carts)
+    const {isLogin,carts} = useContext(AppContext)
     const totalCart = useSelector((state:any) => state.cart.totalCart)
     const dispatch = useDispatch()
-    const cartQuery = useCartQuery()
-
     const onMiniCart = () => {
         const miniCart = document.querySelector<HTMLElement>('.mini-cart');
         if (isOpenCart == true) {
@@ -33,23 +31,10 @@ const MiniCart = () => {
         setIsOpenCart(!isOpenCart)
     }
     useEffect(()=>{
-        if(cartQuery?.data){
-
-            const newCarts = cartQuery?.data?.items.map((item:IcartItem) => ({
-                ...item,
-                total:item.productId? Number(item.productId.price_new * item.quantity) : 0
-            }))
-            dispatch(setCarts(newCarts))
-        }
-    },[cartQuery?.data])
-    useEffect(()=>{
-        if(carts.length > 0){
-            const newTotalPrice = carts.reduce((total:number, item:IcartItem) => Number(total + item.total), 0 )
-            const newTotalCart = carts.reduce((total:number, item:IcartItem) => Number(total + item.quantity), 0 )
-            dispatch(setTotalPrice(newTotalPrice))
+        if(carts?.items?.length > 0){
+            const newTotalCart = carts?.items?.reduce((total:number, item:IcartItem) => Number(total + item.quantity), 0 )
             dispatch(setTotalCart(newTotalCart))
         }else{
-            dispatch(setTotalPrice(0))
             dispatch(setTotalCart(0))
         }
     },[carts])
@@ -69,10 +54,10 @@ const MiniCart = () => {
                         <i className="fa-solid fa-xmark" />
                     </span>
                 </div>
-                <div className="px-6 h-main_mini_cart overflow-y-auto scrollbar mb-6 lg:mb-12">
+                <div className={`px-6 h-main_mini_cart overflow-y-auto scrollbar mb-6 ${(isLogin == false || isLogin == null)? "lg:mb-4 ":"lg:mb-12"}`}>
                     {/* cart item  */}
-                    {carts?.map((item:any,index:number) => (
-                        <CartItem cart={item} key={item._id} index={index} />
+                    {carts?.items?.map((item:any,index:number) => (
+                        <CartItem cart={item} key={item.attributeId} index={index} />
                     ))}
 
 {/*                    
@@ -107,11 +92,16 @@ const MiniCart = () => {
                    
                 </div>
                 <div >
-                    <p className="text-right px-6 pb-3 mb-3 border-b border-gray-200">Tổng cộng: <span className="text-lg font-semibold text-[#0A0A0B]">{totalPrice !== 0 ? formatPrice(totalPrice) : 0 } đ</span></p>
+                    <p className="text-right px-6 pb-3 mb-3 border-b border-gray-200">Tổng cộng: <span className="text-lg font-semibold text-[#0A0A0B]">{carts?.total !== 0 ? formatPrice(carts?.total) : 0 } đ</span></p>
                     <div className="px-6">
-                        <a href='/cart' className="block w-full py-4 bg-black border border-black uppercase font-semibold text-lg  text-center text-white transition duration-300 ease-in-out hover:bg-white hover:text-black ">Xem
+                        <a href='/cart' className="block mb-3 w-full py-4 bg-black border border-black uppercase font-semibold text-lg  text-center text-white transition duration-300 ease-in-out hover:bg-white hover:text-black ">Xem
                             giỏ hàng
                         </a>
+                      {(isLogin == false || isLogin == null) && (
+                         <a href='/signin' className="block mb-3 w-full py-4 text-gray-600 border border-black uppercase font-semibold text-lg  text-center  transition duration-300 ease-in-out hover:bg-black hover:text-white ">
+                        Đăng nhập
+                     </a>
+                      )}
                     </div>
                 </div>
             </div>

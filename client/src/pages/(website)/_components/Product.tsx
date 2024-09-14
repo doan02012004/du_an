@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Iattribute, Igallery, Iproduct } from '../../../common/interfaces/product'
 import { formatPrice } from '../../../common/utils/product'
 import { IColor } from '../../../common/interfaces/Color'
@@ -8,6 +8,10 @@ import { setProductId } from '../../../common/redux/features/productSlice'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import useCartMutation from '../../../common/hooks/carts/useCartMutation'
+
+import { AppContext } from '../../../common/contexts/AppContextProvider'
+import { addToCartLocal } from '../../../services/carts'
+
 
 type Props = {
   product: Iproduct
@@ -18,6 +22,7 @@ const Product = ({ product }: Props) => {
   const [gallery, setGallery] = useState({} as Igallery)
   const [color, setColor] = useState('' as string)
   const [checkSizes, setCheckSizes] = useState([] as string[])
+  const {carts,setCarts} = useContext(AppContext)
   const productId = useSelector((state: any) => state.product.productId)
   const cartMutation = useCartMutation()
   const dispath = useDispatch()
@@ -58,11 +63,14 @@ const Product = ({ product }: Props) => {
   const addToCart = async(size:string) =>{
     // console.log(size)
     const attribute = await product?.attributes?.find((item:Iattribute) => (item.color == color && item.size == size))
-    toast.success("Đã thêm vào giỏ hàng")
-    console.log("cartItem >>:", {productId, attributeId:attribute?._id ,quantity:1})
+    // toast.success("Đã thêm vào giỏ hàng")
+    // console.log("cartItem >>:", {productId, attributeId:attribute?._id ,quantity:1})
     const newCart =  {productId, attributeId:attribute?._id ,quantity:1}
-    cartMutation.mutate({action:"addtocart",newCart:newCart})
+    // cartMutation.mutate({action:"addtocart",newCart:newCart})
+    const res =  await addToCartLocal({...newCart,productId:product,setCarts,carts})
+    setCarts(res)
   }
+  
   return (
     <>
       <div>

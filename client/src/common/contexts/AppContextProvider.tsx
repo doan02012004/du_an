@@ -4,8 +4,8 @@ import { theme } from 'antd'
 import { createContext, ReactNode, useEffect, useState } from 'react'
 import instance from '../config/axios'
 import { getAccountUser, getNewToken } from '../../services/auth'
-import { Iuser } from '../interfaces/auth'
 import useLocalStorage from '../hooks/localstorage/useLocalStorage'
+import useCartQuery from '../hooks/carts/useCartQuery'
 
 type AppContextProviderProps = {
   children: ReactNode
@@ -15,8 +15,9 @@ const fetchUser = async(setCurrentUser?:any,setIsLogin?:any,setIsLoading?:any)=>
   setIsLoading(true)
   try {
     const user = await getAccountUser()
-    setCurrentUser(user)
+   
     if(user){
+      setCurrentUser(user)
       setIsLogin(true)
       
     }
@@ -32,13 +33,16 @@ export const AppContext = createContext<any>(null)
 
 const AppContextProvider = ({ children }: AppContextProviderProps) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null as Iuser | null)
+  const [currentUser, setCurrentUser] = useLocalStorage('tt_user',{})
   const [isLoading, setIsLoading] = useState(false)
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const [accessToken, setAccesToken] = useLocalStorage('accessToken', null)
   const [isLogin,setIsLogin] = useLocalStorage('login',null)
+  const [carts, setCarts] = useLocalStorage("carts",{userId:"",items:[],total:0})
+  const cartQuery = useCartQuery(currentUser?._id)
+  // Interceptor request axios
   useEffect(() => {
     // Thêm một request interceptor
     const requestInterceptor = instance.interceptors.request.use(function (config:any) {
@@ -54,6 +58,8 @@ const AppContextProvider = ({ children }: AppContextProviderProps) => {
       instance.interceptors.request.eject(requestInterceptor)
     }
   }, [accessToken])
+
+  // Interceptor response axios
   useEffect(() => {
     // Add a response interceptor
     const responseInterceptors = instance.interceptors.response.use(function (response) {
@@ -63,6 +69,7 @@ const AppContextProvider = ({ children }: AppContextProviderProps) => {
       if (error.response?.data?.EC === 1) {
         setAccesToken(null)
         setIsLogin(false)
+        setCurrentUser(null)
       }
       else if (error.response && error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
@@ -93,15 +100,33 @@ const AppContextProvider = ({ children }: AppContextProviderProps) => {
       instance.interceptors.response.eject(responseInterceptors)
     }
   }, [])
+
+  // get user
   useEffect(() => {
-  if(accessToken === undefined || accessToken === undefined && isLogin == false || isLogin === null ||isLogin === undefined ||isLogin === true && !currentUser) {
+  // if(accessToken === undefined || accessToken === undefined && isLogin == false || isLogin === null ||isLogin === undefined ||isLogin === true && !currentUser) {
+  //   fetchUser(setCurrentUser,setIsLogin,setIsLoading)
+    
+  // }
+  if(accessToken || accessToken == undefined){
     fetchUser(setCurrentUser,setIsLogin,setIsLoading)
-    // console.log("Ok")
-    // console.log("currentUser >> :",currentUser)
+  }else{
+    setIsLogin(false)
+    if(carts.userId !==''){
+      setCarts({userId:"",items:[],total:0})
+    }
+    setCurrentUser({})
   }
-  },[isLogin,accessToken,currentUser])
+  },[accessToken])
+
+  // get cart 
+  useEffect(()=>{
+    if(cartQuery?.data){
+      setCarts(cartQuery.data)
+    }
+  },[cartQuery.data])
+  console.log(carts)
   return (
-    <AppContext.Provider value={{ collapsed, setCollapsed, colorBgContainer, borderRadiusLG, accessToken, setAccesToken,setIsLogin,isLogin,isLoading,currentUser }}>
+    <AppContext.Provider value={{collapsed, setCollapsed, colorBgContainer, borderRadiusLG, accessToken, setAccesToken,setIsLogin,isLogin,isLoading,currentUser,carts, setCarts }}>
       {children}
     </AppContext.Provider>
   )

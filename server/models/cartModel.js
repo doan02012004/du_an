@@ -12,6 +12,10 @@ const cartItem = new Schema(
       },
       quantity:{
         type:Number
+      },
+      totalPrice:{
+        type:Number,
+        default: 0
       }
     }
   );
@@ -22,7 +26,11 @@ const cartSchema = new Schema(
       ref:'users',
       required: true,
     },
-    items: [cartItem]
+    items: [cartItem],
+    total:{
+      type:Number,
+      default: 0
+    }
   },
   { timestamps: true, versionKey: false }
 );
